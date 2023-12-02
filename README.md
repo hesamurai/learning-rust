@@ -1,5 +1,7 @@
 # Learning Rust
 
+## Different commands
+
 ```bash
 # to check Rust version
 rustc --version
@@ -30,4 +32,33 @@ cargo run
 
 # to check code to make sure it compiles
 cargo check
+
+# to update the dependencies
+cargo update
+
+# to build documentation provided by all your dependencies locally and open it in your browser
+cargo doc --open 
 ```
+
+## Standard Library
+
+### std::io
+
+`std::io` is used to obtain user input: https://doc.rust-lang.org/std/io/index.html
+
+`std::cmp` is used for comparison purposes: https://doc.rust-lang.org/std/cmp/index.html
+
+## Variables
+
+In Rust, variables are immutable by default:
+
+```bash
+let apples = 5; // immutable
+let mut bananas = 5; // mutable
+```
+
+## Types
+
+- `String` is a string type provided by the standard library that is a growable, UTF-8 encoded bit of text
+- `i32` is a 32-bit integer
+- `u32` is an unsigned 32-bit integer

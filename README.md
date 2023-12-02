@@ -12,4 +12,7 @@ rustup self uninstall
 
 # to load local documentation
 rustup doc
+
+# to compile a Rust file
+rustc {path to file}
 ```

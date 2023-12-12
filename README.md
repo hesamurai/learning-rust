@@ -180,3 +180,128 @@ fn print_labeled_measurement(value: i32, unit_label: char) {
     println!("The measurement is: {value}{unit_label}");
 }
 ```
+
+## `if` expressions
+
+The condition of an `if` expression must be a `bool`. If the condition isn’t a bool, we’ll get an error. Rust only
+executes the block for the first `true` condition, and once it finds one, it does not even check the rest.
+
+```rust
+fn main() {
+    let number = 6;
+
+    if number % 4 == 0 {
+        println!("number is divisible by 4");
+    } else if number % 3 == 0 {
+        println!("number is divisible by 3"); // this line would be hit
+    } else if number % 2 == 0 {
+        println!("number is divisible by 2");
+    } else {
+        println!("number is not divisible by 4, 3, or 2");
+    }
+}
+```
+
+Because `if` is an expression, we can use it on the right side of a `let` statement to assign the outcome to a variable:
+
+```rust
+fn main() {
+    let condition = true;
+    let number = if condition { 5 } else { 6 };
+
+    // the following line would print: The value of number is: 5
+    println!("The value of number is: {number}");
+}
+```
+
+## Repetition with Loops
+
+Rust has 3 kinds of loops: `loop`, `while`, and `for`.
+
+The loop keyword tells Rust to execute a block of code over and over again forever or until you explicitly tell it to
+stop:
+
+```rust
+fn main() {
+    let mut counter = 0;
+
+    let result = loop {
+        counter += 1;
+
+        if counter == 10 {
+            break counter * 2;
+        }
+    }; // we use a semicolon to end the statement that assigns the value to result
+
+    println!("The result is {result}");
+}
+```
+
+If you have loops within loops, `break` and `continue` apply to the innermost loop at that point. You can optionally
+specify a loop label on a loop that you can then use with `break` or `continue` to specify that those keywords apply to
+the labeled loop instead of the innermost loop. Loop labels must begin with a `single quote`. Here’s an example with two
+nested loops:
+
+```rust
+fn main() {
+    let mut count = 0;
+    'counting_up: loop {
+        println!("count = {count}");
+        let mut remaining = 10;
+
+        loop {
+            println!("remaining = {remaining}");
+            if remaining == 9 {
+                break;
+            }
+            if count == 2 {
+                break 'counting_up;
+            }
+            remaining -= 1;
+        }
+
+        count += 1;
+    }
+    println!("End count = {count}");
+}
+```
+
+which will print:
+
+```bash
+count = 0
+remaining = 10
+remaining = 9
+count = 1
+remaining = 10
+remaining = 9
+count = 2
+remaining = 10
+End count = 2
+```
+
+A `while` loop example:
+
+```rust
+fn main() {
+    let a = [10, 20, 30, 40, 50];
+    let mut index = 0;
+
+    while index < 5 {
+        println!("the value is: {}", a[index]);
+
+        index += 1;
+    }
+}
+```
+
+A `for` loop example (countdown):
+
+```rust
+fn main() {
+    for number in (1..4).rev() {
+        println!("{number}!");
+    }
+    println!("LIFTOFF!!!");
+}
+```

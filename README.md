@@ -549,3 +549,73 @@ A `struct`, or `structure`, is a custom data type that lets you package together
 make up a meaningful group. If you’re familiar with an object-oriented language, a struct is like an object’s data
 attributes. `Structs` and `enums` are the building blocks for creating new types in your program’s domain to take full
 advantage of Rust’s compile-time type checking.
+
+```rust
+struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+
+fn main() {
+    let user1 = User {
+        active: true,
+        username: String::from("hesamurai"),
+        email: String::from("someone@example.com"),
+        sign_in_count: 1,
+    };
+}
+```
+
+As with any expression, we can construct a new instance of the struct as the last expression in the function body to
+implicitly return that new instance.
+
+```rust
+fn build_user(email: String, username: String) -> User {
+    User {
+        active: true,
+        username, // field init shorthand syntax
+        email, // field init shorthand syntax
+        sign_in_count: 1,
+    }
+}
+```
+
+It’s often useful to create a new instance of a struct that includes most of the values from another instance, but 
+changes some. You can do this using struct update syntax.
+
+```rust
+fn main() {
+    let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1 // remaining fields not explicitly set should have the same value as the fields in the given instance
+    };
+}
+```
+
+### Tuple Structs
+Rust also supports structs that look similar to tuples, called `tuple structs`.
+
+```rust
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+fn main() {
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+}
+```
+
+### Unit-Like Structs
+
+You can also define structs that don’t have any fields! Unit-like structs can be useful when you need to implement a
+trait on some type but don’t have any data that you want to store in the type itself.
+
+```rust
+struct AlwaysEqual;
+
+fn main() {
+    let subject = AlwaysEqual;
+}
+```

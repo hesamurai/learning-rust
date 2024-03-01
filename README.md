@@ -619,3 +619,115 @@ fn main() {
     let subject = AlwaysEqual;
 }
 ```
+
+## Enums
+
+Enums allow you to define a type by enumerating its possible variants. Where structs give you a way of grouping 
+together related fields and data, like a `Rectangle` with its `width` and `height`, enums give you a way of saying a 
+value is one of a possible set of values.
+
+```rust
+enum IpAddrKind {
+    V4,
+    V6,
+}
+
+// We can create instances of each of the two variants of IpAddrKind like this:
+let four = IpAddrKind::V4;
+let six = IpAddrKind::V6;
+
+struct IpAddr {
+    kind: IpAddrKind,
+    address: String,
+}
+
+let home = IpAddr {
+    kind: IpAddrKind::V4,
+    address: String::from("127.0.0.1"),
+};
+
+let loopback = IpAddr {
+    kind: IpAddrKind::V6,
+    address: String::from("::1"),
+};
+```
+
+Representing the same concept using just an enum is more concise: rather than an enum inside a struct, we can put 
+data directly into each enum variant. This new definition of the `IpAddr` enum says that both `V4` and `V6` variants 
+will have associated `String` values. Here, it’s also easier to see another detail of how enums work: the name of 
+each enum variant that we define also becomes a function that constructs an instance of the enum:
+
+```rust
+enum IpAddr {
+    V4(String),
+    V6(String),
+}
+
+let home = IpAddr::V4(String::from("127.0.0.1"));
+let loopback = IpAddr::V6(String::from("::1"));
+```
+
+There’s another advantage to using an enum rather than a struct: each variant can have different types and amounts 
+of associated data. Version four IP addresses will always have four numeric components that will have values between 
+0 and 255. If we wanted to store `V4` addresses as four u8 values but still express `V6` addresses as one `String` 
+value, we wouldn’t be able to with a struct. Enums handle this case with ease:
+
+```rust
+enum IpAddr {
+    V4(u8, u8, u8, u8),
+    V6(String),
+}
+
+let home = IpAddr::V4(127, 0, 0, 1);
+let loopback = IpAddr::V6(String::from("::1"));
+```
+
+Let’s look at another example of an enum which has a wide variety of types embedded in its variants:
+
+```rust
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+```
+
+The following structs could hold the same data that the preceding enum variants hold:
+
+```rust
+struct QuitMessage; // unit struct
+struct MoveMessage {
+    x: i32,
+    y: i32,
+}
+struct WriteMessage(String); // tuple struct
+struct ChangeColorMessage(i32, i32, i32); // tuple struct
+```
+
+But if we used the different structs, each of which has its own type, we couldn’t as easily define a function to 
+take any of these kinds of messages as we could with the `Message` enum defined earlier which is a single type. 
+We’re also able to define methods on enums. Here’s a method named `call` that we could define on our Message enum:
+
+```rust
+impl Message {
+    fn call(&self) {
+        // method body would be defined here
+    }
+}
+
+let m = Message::Write(String::from("hello"));
+m.call(); // The body of the method would use self to get the value that we called the method on.
+```
+
+### The Option Enum and Its Advantages Over Null Values
+
+Rust does not have nulls, but it does have an enum that can encode the concept of a value being present or absent. 
+This enum is `Option<T>`, and it is defined by the standard library as follows:
+
+```rust
+enum Option<T> {
+    None,
+    Some(T),
+}
+```

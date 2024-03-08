@@ -868,3 +868,12 @@ if let Coin::Quarter(state) = coin {
     count += 1;
 }
 ```
+
+## Module System
+
+### Package
+
+A `package` is a bundle of one or more crates that provides a set of functionality:
+
+- A package can contain as many binary crates as you like, but at most only one library crate.
+- A package must contain at least one crate, whether that’s a library or binary crate.

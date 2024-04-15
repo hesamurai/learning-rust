@@ -877,3 +877,44 @@ A `package` is a bundle of one or more crates that provides a set of functionali
 
 - A package can contain as many binary crates as you like, but at most only one library crate.
 - A package must contain at least one crate, whether that’s a library or binary crate.
+
+In Rust, all items (functions, methods, structs, enums, modules, and constants) are private to parent modules by 
+default. If you want to make an item like a function or struct private, you put it in a module. Items in a parent 
+module can’t use the private items inside child modules, but items in child modules can use the items in their 
+ancestor modules. This is because child modules wrap and hide their implementation details, but the child modules 
+can see the context in which they’re defined. Rust does give you the option to expose inner parts of child modules’ 
+code to outer ancestor modules by using the `pub` keyword to make an item public. The pub keyword on a module only 
+lets code in its ancestor modules refer to it, not access its inner code. The privacy rules apply to structs, enums, 
+functions, and methods as well as modules.
+
+```rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+
+pub fn eat_at_restaurant() {
+    // Absolute path
+    crate::front_of_house::hosting::add_to_waitlist();
+
+    // Relative path
+    front_of_house::hosting::add_to_waitlist();
+}
+```
+
+We can construct relative paths that begin in the parent module, rather than the current module or the crate root, 
+by using super at the start of the path.
+
+```rust
+fn deliver_order() {}
+
+mod back_of_house {
+    fn fix_incorrect_order() {
+        cook_order();
+        super::deliver_order();
+    }
+
+    fn cook_order() {}
+}
+```

@@ -918,3 +918,120 @@ mod back_of_house {
     fn cook_order() {}
 }
 ```
+
+## Common Collections
+
+Most other data types represent one specific value, but collections can contain multiple values. Unlike the built-in 
+array and tuple types, the data these collections point to is stored on the heap, which means the amount of data 
+does not need to be known at compile time and can grow or shrink as the program runs. Some examples which are often 
+used in Rust programs:
+
+- A `vector` allows you to store a variable number of values next to each other.
+- A `string` is a collection of characters.
+- A `hash map` allows you to associate a value with a particular key. It’s a particular implementation of the more 
+  general data structure called a `map`.
+
+### Vectors
+
+Vectors can only store values of the same type. They are useful when you have a list of items, such as the lines of 
+text in a file or the prices of items in a shopping cart.
+
+```rust
+// the Vec<T> in v will hold elements of the i32 type
+let v: Vec<i32> = Vec::new();
+```
+
+Rust conveniently provides the vec! macro, which will create a new vector that holds the values you give it. The 
+code below creates a new `Vec<i32>` that holds the values `1`, `2`, and `3`. The integer type is `i32` because 
+that’s the default integer type:
+
+```rust
+let v = vec![1, 2, 3];
+```
+
+To add new items to a vector:
+
+```rust
+let mut v = Vec::new(); // we need to make it mutable
+
+v.push(5);
+v.push(6);
+v.push(7);
+v.push(8);
+```
+
+#### Reading Elements of Vectors
+
+```rust
+let v = vec![1, 2, 3, 4, 5];
+
+let third: &i32 = &v[2];
+println!("The third element is {third}");
+
+let third: Option<&i32> = v.get(2);
+match third {
+    Some(third) => println!("The third element is {third}"),
+    None => println!("There is no third element."),
+}
+```
+
+#### Iterating over the Values in a Vector
+
+The code below shows how to use a for loop to get immutable references to each element in a vector of `i32` values and 
+print them:
+
+```rust
+let v = vec![100, 32, 57];
+for i in &v {
+    println!("{i}");
+}
+```
+
+We can also iterate over mutable references to each element in a mutable vector in order to make changes to all the 
+elements. The `for` loop in Listing 8-8 will add `50` to each element:
+
+```rust
+let mut v = vec![100, 32, 57];
+for i in &mut v {
+    *i += 50; // we have to use the * dereference operator to get to the value in `i`
+}
+```
+
+#### Using an Enum to Store Multiple Types
+
+The variants of an enum are defined under the same enum type, so when we need one type to represent elements of 
+different types, we can define and use an enum!
+
+```rust
+enum SpreadsheetCell {
+    Int(i32),
+    Float(f64),
+    Text(String),
+}
+
+let row = vec![
+    SpreadsheetCell::Int(3),
+    SpreadsheetCell::Text(String::from("blue")),
+    SpreadsheetCell::Float(10.12),
+];
+```
+
+If you don’t know the exhaustive set of types a program will get at runtime to store in a vector, the enum technique 
+won’t work. Instead, you can use a trait object.
+
+#### Dropping a Vector Drops Its Elements
+
+Like any other struct, a vector is freed when it goes out of scope:
+
+```rust
+    {
+        let v = vec![1, 2, 3, 4];
+
+        // do stuff with v
+    } // <- v goes out of scope and is freed here
+```
+
+When the vector gets dropped, all of its contents are also dropped, meaning the integers it holds will be cleaned up.
+The borrow checker ensures that any references to contents of a vector are only used while the vector itself is valid.
+
+[Vector API](https://doc.rust-lang.org/std/vec/struct.Vec.html)

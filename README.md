@@ -1035,3 +1035,28 @@ When the vector gets dropped, all of its contents are also dropped, meaning the 
 The borrow checker ensures that any references to contents of a vector are only used while the vector itself is valid.
 
 [Vector API](https://doc.rust-lang.org/std/vec/struct.Vec.html)
+
+### Strings
+
+#### What Is a String?
+
+Rust has only one string type in the core language, which is the string slice `str` that is usually seen in its 
+borrowed form `&str`. _String slices_ are references to some UTF-8 encoded string data stored elsewhere. String 
+literals, for example, are stored in the program’s binary and are therefore string slices.
+
+The `String` type, which is provided by Rust’s standard library rather than coded into the core language, is a 
+growable, mutable, owned, UTF-8 encoded string type.
+
+Many of the same operations available with `Vec<T>` are available with `String` as well, because `String` is actually 
+implemented as a wrapper around a vector of bytes with some extra guarantees, restrictions, and capabilities.
+
+```rust
+let mut s = String::new();
+
+// or
+let data = "initial contents";
+let s = data.to_string();
+
+// the method also works on a literal directly:
+let s = "initial contents".to_string();
+```

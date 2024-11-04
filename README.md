@@ -1222,3 +1222,96 @@ for word in text.split_whitespace() {
 
 println!("{map:?}"); // will print {"world": 2, "hello": 1, "wonderful": 1}
 ```
+
+## Error Handling
+
+Rust groups errors into two major categories: `recoverable` and `unrecoverable` errors. For a recoverable error, such as
+a file not found error, we most likely just want to report the problem to the user and retry the operation.
+Unrecoverable errors are always symptoms of bugs, such as trying to access a location beyond the end of an array, and so
+we want to immediately stop the program.
+
+Rust doesn’t have exceptions. Instead, it has the type `Result<T, E>` for recoverable errors and the `panic!` macro that
+stops execution when the program encounters an unrecoverable error.
+
+```rust
+use std::fs::File;
+use std::io::ErrorKind;
+
+fn main() {
+  let greeting_file_result = File::open("hello.txt");
+
+  let greeting_file = match greeting_file_result {
+    Ok(file) => file,
+    Err(error) => match error.kind() {
+      ErrorKind::NotFound => match File::create("hello.txt") {
+        Ok(fc) => fc,
+        Err(e) => panic!("Problem creating the file: {e:?}"),
+      },
+      other_error => {
+        panic!("Problem opening the file: {other_error:?}");
+      }
+    },
+  };
+}
+
+// OR
+
+fn main() {
+  let greeting_file = File::open("hello.txt").unwrap_or_else(|error| {
+    if error.kind() == ErrorKind::NotFound {
+      File::create("hello.txt").unwrap_or_else(|error| {
+        panic!("Problem creating the file: {error:?}");
+      })
+    } else {
+      panic!("Problem opening the file: {error:?}");
+    }
+  });
+}
+```
+
+```rust
+use std::fs::File;
+use std::io::{self, Read};
+
+fn read_username_from_file() -> Result<String, io::Error> {
+    let username_file_result = File::open("hello.txt");
+
+    let mut username_file = match username_file_result {
+        Ok(file) => file,
+        Err(e) => return Err(e), // mind the return keyword to return early out of the function entirely
+    };
+
+    let mut username = String::new();
+
+    match username_file.read_to_string(&mut username) {
+        Ok(_) => Ok(username),
+        Err(e) => Err(e),
+    }
+}
+
+// OR
+
+fn read_username_from_file() -> Result<String, io::Error> {
+  let mut username_file = File::open("hello.txt")?; // mind the ? operator
+  let mut username = String::new();
+  username_file.read_to_string(&mut username)?;
+  Ok(username)
+}
+
+// OR
+
+fn read_username_from_file() -> Result<String, io::Error> {
+  let mut username = String::new();
+  File::open("hello.txt")?.read_to_string(&mut username)?;
+  Ok(username)
+}
+
+// OR
+
+use std::fs;
+use std::io;
+
+fn read_username_from_file() -> Result<String, io::Error> {
+  fs::read_to_string("hello.txt")
+}
+```

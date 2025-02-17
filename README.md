@@ -1441,3 +1441,179 @@ fn main() {
     println!("p3.x = {}, p3.y = {}", p3.x, p3.y);
 }
 ```
+
+## Traits: Defining Shared Behavior
+
+A _trait_ defines the functionality a particular type has and can share with other types. We can use traits to define 
+shared behavior in an abstract way. We can use _trait bounds_ to specify that a generic type can be any type that has 
+certain behavior.
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+pub struct NewsArticle {
+  pub headline: String,
+  pub location: String,
+  pub author: String,
+  pub content: String,
+}
+
+impl Summary for NewsArticle {
+  fn summarize(&self) -> String {
+    format!("{}, by {} ({})", self.headline, self.author, self.location)
+  }
+}
+
+pub struct Tweet {
+  pub username: String,
+  pub content: String,
+  pub reply: bool,
+  pub retweet: bool,
+}
+
+impl Summary for Tweet {
+  fn summarize(&self) -> String {
+    format!("{}: {}", self.username, self.content)
+  }
+}
+```
+
+We can implement a trait on a type only if either the trait or the type, or both, are local to our crate.
+
+Sometimes it’s useful to have default behavior for some or all of the methods in a trait instead of requiring 
+implementations for all methods on every type. Then, as we implement the trait on a particular type, we can keep or 
+override each method’s default behavior.
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String {
+        String::from("(Read more...)")
+    }
+}
+
+// To use a default implementation to summarize instances of NewsArticle, we specify an empty impl block with:
+impl Summary for NewsArticle {}
+```
+
+Default implementations can call other methods in the same trait, even if those other methods don’t have a default 
+implementation. In this way, a trait can provide a lot of useful functionality and only require implementors to 
+specify a small part of it. For example, we could define the `Summary` trait to have a `summarize_author` method whose 
+implementation is required, and then define a `summarize` method that has a default implementation that calls the 
+`summarize_author` method:
+
+```rust
+pub trait Summary {
+    fn summarize_author(&self) -> String;
+
+    fn summarize(&self) -> String {
+        format!("(Read more from {}...)", self.summarize_author())
+    }
+}
+```
+
+To use this version of `Summary`, we only need to define `summarize_author` when we implement the trait on a type:
+
+```rust
+impl Summary for Tweet {
+    fn summarize_author(&self) -> String {
+        format!("@{}", self.username)
+    }
+}
+```
+
+Note that it is **not** possible to call the default implementation from an overriding implementation of that same 
+method.
+
+### Traits as Parameters
+
+```rust
+pub fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+
+### Trait Bound Syntax
+
+The `impl Trait` syntax works for straightforward cases but is actually syntax sugar for a longer form known as a 
+_trait bound_; it looks like this:
+
+```rust
+pub fn notify<T: Summary>(item: &T) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+
+Using `impl Trait` is appropriate if we want the following function to allow `item1` and `item2` to have different types 
+(as long as both types implement `Summary`). If we want to force both parameters to have the same type, however, we
+must use a trait bound, like the one on th2 second line:
+
+```rust
+pub fn notify(item1: &impl Summary, item2: &impl Summary) {}
+pub fn notify<T: Summary>(item1: &T, item2: &T) {}
+```
+
+### Specifying Multiple Trait Bounds with the `+` Syntax
+
+```rust
+pub fn notify(item: &(impl Summary + Display)) {}
+pub fn notify<T: Summary + Display>(item: &T) {}
+```
+
+### Clearer Trait Bounds with `where` Clauses
+
+```rust
+fn some_function<T: Display + Clone, U: Clone + Debug>(t: &T, u: &U) -> i32 {}
+
+fn some_function<T, U>(t: &T, u: &U) -> i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+{}
+```
+
+### Returning Types That Implement Traits
+
+```rust
+fn returns_summarizable() -> impl Summary {
+    Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        retweet: false,
+    }
+}
+```
+
+Note that you can only use impl Trait if you’re returning a single type. For example, this code that returns either 
+a `NewsArticle` or a `Tweet` with the return type specified as `impl Summary` wouldn’t work:
+
+```rust
+fn returns_summarizable(switch: bool) -> impl Summary {
+    if switch {
+        NewsArticle {
+            headline: String::from(
+                "Penguins win the Stanley Cup Championship!",
+            ),
+            location: String::from("Pittsburgh, PA, USA"),
+            author: String::from("Iceburgh"),
+            content: String::from(
+                "The Pittsburgh Penguins once again are the best \
+                 hockey team in the NHL.",
+            ),
+        }
+    } else {
+        Tweet {
+            username: String::from("horse_ebooks"),
+            content: String::from(
+                "of course, as you probably already know, people",
+            ),
+            reply: false,
+            retweet: false,
+        }
+    }
+}
+```

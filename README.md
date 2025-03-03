@@ -1617,3 +1617,26 @@ fn returns_summarizable(switch: bool) -> impl Summary {
     }
 }
 ```
+
+## Validating References with Lifetimes
+
+Lifetimes ensure that references are valid as long as we need them to be. The main aim of lifetimes is to prevent 
+dangling references, which cause a program to reference data other than the data it’s intended to reference.
+
+```rust
+fn main() {
+    let r;
+
+    {
+        let x = 5;
+        r = &x;
+    }
+
+    println!("r: {r}");
+}
+```
+
+The outer scope declares a variable named `r` with no initial value, and the inner scope declares a variable named `x` 
+with the initial value of `5`. Inside the inner scope, we attempt to set the value of `r` as a reference to `x`. Then
+the inner scope ends, and we attempt to print the value in `r`. This code won’t compile because the value that `r` is 
+referring to has gone out of scope before we try to use it.
